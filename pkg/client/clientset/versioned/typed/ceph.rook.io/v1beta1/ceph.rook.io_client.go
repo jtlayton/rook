@@ -29,6 +29,7 @@ type CephV1beta1Interface interface {
 	RESTClient() rest.Interface
 	ClustersGetter
 	FilesystemsGetter
+	NFSGaneshasGetter
 	ObjectStoresGetter
 	ObjectStoreUsersGetter
 	PoolsGetter
