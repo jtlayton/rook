@@ -39,7 +39,7 @@ const (
 	prometheusModuleName = "prometheus"
 	dashboardModuleName  = "dashboard"
 	metricsPort          = 9283
-	dashboardPort        = 7000
+	dashboardPort        = 8443
 )
 
 var mgrNames = []string{"a", "b"}
