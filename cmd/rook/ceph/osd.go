@@ -78,10 +78,6 @@ var (
 	osdIsDevice         bool
 )
 
-func addCopyBinariesFlags(command *cobra.Command) {
-	command.Flags().StringVar(&copyBinariesPath, "copy-binaries-path", "", "If specified, copy the rook binaries to this path for use by the daemon container")
-}
-
 func addOSDFlags(command *cobra.Command) {
 	addOSDConfigFlags(osdConfigCmd)
 	addOSDConfigFlags(provisionCmd)
