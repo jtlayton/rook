@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # the latest mimic release is the base image
-FROM ceph/ceph:v13
+FROM ceph/daemon-base:integ-master-centos-7-x86_64
 
 ARG ARCH
 ARG TINI_VERSION
