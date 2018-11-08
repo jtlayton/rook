@@ -142,36 +142,12 @@ func validateGanesha(context *clusterd.Context, n cephv1beta1.NFSGanesha) error 
 		return fmt.Errorf("missing namespace")
 	}
 
-	// Store properties
-	if n.Spec.Store.Name == "" {
-		return fmt.Errorf("missing storeName")
-	}
-	if n.Spec.Store.Type != "file" && n.Spec.Store.Type != "object" {
-		return fmt.Errorf("unrecognized store type: %s", n.Spec.Store.Type)
-	}
-
 	// Client recovery properties
 	if n.Spec.ClientRecovery.Pool == "" {
 		return fmt.Errorf("missing clientRecovery.pool")
 	}
 	if n.Spec.ClientRecovery.Namespace == "" {
 		return fmt.Errorf("missing clientRecovery.namesapce")
-	}
-
-	// Export properties
-	if len(n.Spec.Exports) == 0 {
-		return fmt.Errorf("at least one export is required")
-	}
-	for i, export := range n.Spec.Exports {
-		if export.Path == "" {
-			return fmt.Errorf("missing path for export %d", i)
-		}
-		if export.PseudoPath == "" {
-			return fmt.Errorf("missing pseudoPath for export %d", i)
-		}
-		if err := verifyExportExists(context, export); err != nil {
-			return fmt.Errorf("invalid export path. %+v", err)
-		}
 	}
 
 	// Ganesha server properties
