@@ -70,6 +70,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1().CephClusters().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("cephfilesystems"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1().CephFilesystems().Informer()}, nil
+	case v1.SchemeGroupVersion.WithResource("cephnfss"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1().CephNFSs().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("cephobjectstores"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1().CephObjectStores().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("cephobjectstoreusers"):
@@ -80,8 +82,6 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1beta1().Clusters().Informer()}, nil
 	case v1beta1.SchemeGroupVersion.WithResource("filesystems"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1beta1().Filesystems().Informer()}, nil
-	case v1beta1.SchemeGroupVersion.WithResource("nfsganeshas"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1beta1().NFSGaneshas().Informer()}, nil
 	case v1beta1.SchemeGroupVersion.WithResource("objectstores"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Ceph().V1beta1().ObjectStores().Informer()}, nil
 	case v1beta1.SchemeGroupVersion.WithResource("objectstoreusers"):

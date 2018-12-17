@@ -1,5 +1,5 @@
-apiVersion: ceph.rook.io/v1beta1
-kind: NFSGanesha
+apiVersion: ceph.rook.io/v1
+kind: CephNFS
 metadata:
   name: my-nfs
   namespace: rook-ceph

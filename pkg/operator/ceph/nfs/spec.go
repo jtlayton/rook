@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"path"
 
-	cephv1beta1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1beta1"
+	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	opmon "github.com/rook/rook/pkg/operator/ceph/cluster/mon"
 	opspec "github.com/rook/rook/pkg/operator/ceph/spec"
 	"github.com/rook/rook/pkg/operator/k8sutil"
@@ -38,7 +38,7 @@ const (
 	ganeshaPort         = 2049
 )
 
-func (c *GaneshaController) createGaneshaService(n cephv1beta1.NFSGanesha, name string) error {
+func (c *GaneshaController) createGaneshaService(n cephv1.CephNFS, name string) error {
 	labels := getLabels(n, name)
 	svc := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -76,7 +76,7 @@ func (c *GaneshaController) createGaneshaService(n cephv1beta1.NFSGanesha, name 
 	return nil
 }
 
-func (c *GaneshaController) makeDeployment(n cephv1beta1.NFSGanesha, name, configName string) *extensions.Deployment {
+func (c *GaneshaController) makeDeployment(n cephv1.CephNFS, name, configName string) *extensions.Deployment {
 	binariesEnvVar, binariesVolume, binariesMount := k8sutil.BinariesMountInfo()
 
 	deployment := &extensions.Deployment{
@@ -123,7 +123,7 @@ func (c *GaneshaController) makeDeployment(n cephv1beta1.NFSGanesha, name, confi
 	return deployment
 }
 
-func (c *GaneshaController) initContainer(n cephv1beta1.NFSGanesha, binariesEnvVar v1.EnvVar, binariesMount v1.VolumeMount) v1.Container {
+func (c *GaneshaController) initContainer(n cephv1.CephNFS, binariesEnvVar v1.EnvVar, binariesMount v1.VolumeMount) v1.Container {
 
 	return v1.Container{
 		Args: []string{
@@ -149,7 +149,7 @@ func (c *GaneshaController) initContainer(n cephv1beta1.NFSGanesha, binariesEnvV
 	}
 }
 
-func (c *GaneshaController) daemonContainer(n cephv1beta1.NFSGanesha, name string, binariesMount v1.VolumeMount) v1.Container {
+func (c *GaneshaController) daemonContainer(n cephv1.CephNFS, name string, binariesMount v1.VolumeMount) v1.Container {
 	configMount := v1.VolumeMount{Name: ganeshaConfigVolume, MountPath: "/etc/ganesha"}
 
 	return v1.Container{
@@ -176,7 +176,7 @@ func (c *GaneshaController) daemonContainer(n cephv1beta1.NFSGanesha, name strin
 	}
 }
 
-func getLabels(n cephv1beta1.NFSGanesha, name string) map[string]string {
+func getLabels(n cephv1.CephNFS, name string) map[string]string {
 	return map[string]string{
 		k8sutil.AppAttr:     appName,
 		k8sutil.ClusterAttr: n.Namespace,

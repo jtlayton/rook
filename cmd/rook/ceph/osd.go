@@ -94,7 +94,8 @@ func addOSDFlags(command *cobra.Command) {
 	osdConfigCmd.Flags().IntVar(&osdID, "osd-id", -1, "osd id for which to generate config")
 	osdConfigCmd.Flags().BoolVar(&osdIsDevice, "is-device", false, "whether the osd is a device")
 
-	addCopyBinariesFlags(osdConfigCmd)
+	// flag for copying the rook binaries for use by a ceph container
+	copyBinariesCmd.Flags().StringVar(&copyBinariesPath, "path", "", "Copy the rook binaries to this path for use by a ceph container")
 
 	// flags for running filestore on a device
 	filestoreDeviceCmd.Flags().StringVar(&mountSourcePath, "source-path", "", "the source path of the device to mount")
@@ -229,7 +230,7 @@ func copyRookBinaries(cmd *cobra.Command, args []string) error {
 	if err := flags.VerifyRequiredFlags(copyBinariesCmd, []string{"path"}); err != nil {
 		return err
 	}
-	copyBinaries()
+	copyBinaries(copyBinariesPath)
 	return nil
 }
 
@@ -330,9 +331,9 @@ func parseDevices(devices string) ([]osddaemon.DesiredDevice, error) {
 	return result, nil
 }
 
-func copyBinaries() {
-	if copyBinariesPath != "" {
-		if err := osddaemon.CopyBinariesForDaemon(copyBinariesPath); err != nil {
+func copyBinaries(path string) {
+	if path != "" {
+		if err := osddaemon.CopyBinariesForDaemon(path); err != nil {
 			logger.Errorf("failed to copy rook binaries for daemon container. %+v", err)
 		} else {
 			logger.Infof("successfully copied rook binaries")

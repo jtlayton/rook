@@ -17,15 +17,18 @@ limitations under the License.
 // Package nfs for NFS ganesha
 package nfs
 
-import "fmt"
-import cephv1beta1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1beta1"
+import (
+	"fmt"
+
+	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
+)
 
 const (
 	cephConfigPath = "/etc/ceph/ceph.conf"
 	userID         = "admin"
 )
 
-func getGaneshaNodeID(n cephv1beta1.NFSGanesha, name string) string {
+func getGaneshaNodeID(n cephv1.CephNFS, name string) string {
 	return fmt.Sprintf("%s.%s", n.Name, name)
 }
 
@@ -33,7 +36,7 @@ func getGaneshaConfigObject(nodeID string) string {
 	return fmt.Sprintf("conf-%s", nodeID)
 }
 
-func getRadosURL(n cephv1beta1.NFSGanesha, nodeID string) string {
+func getRadosURL(n cephv1.CephNFS, nodeID string) string {
 	url := fmt.Sprintf("rados://%s/", n.Spec.RADOS.Pool)
 
 	if n.Spec.RADOS.Namespace != "" {
@@ -44,7 +47,7 @@ func getRadosURL(n cephv1beta1.NFSGanesha, nodeID string) string {
 	return url
 }
 
-func getGaneshaConfig(n cephv1beta1.NFSGanesha, name string) string {
+func getGaneshaConfig(n cephv1.CephNFS, name string) string {
 	nodeID := getGaneshaNodeID(n, name)
 	url := getRadosURL(n, nodeID)
 	return `

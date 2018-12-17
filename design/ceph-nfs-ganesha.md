@@ -64,8 +64,8 @@ The NFS-Ganesha CRD will specify the following:
 Below is an example NFS-Ganesha CRD, `nfs-ganesha.yaml`
 
 ```yaml
-apiVersion: ceph.rook.io/v1alpha1
-kind: NFSGanesha
+apiVersion: ceph.rook.io/v1
+kind: CephNFS
 metadata:
   # The name of Ganesha server cluster to create. It will be reflected in
   # the name(s) of the ganesha server pod(s)
