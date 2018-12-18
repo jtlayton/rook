@@ -29,12 +29,12 @@ import (
 )
 
 // Create the ganesha server
-func (c *GaneshaController) createGanesha(n cephv1.CephNFS) error {
+func (c *CephNFSController) createCephNFS(n cephv1.CephNFS) error {
 	if err := validateGanesha(c.context, n); err != nil {
 		return err
 	}
 
-	logger.Infof("start running ganesha %s", n.Name)
+	logger.Infof("start running ceph nfs %s", n.Name)
 
 	for i := 0; i < n.Spec.Server.Active; i++ {
 		name := k8sutil.IndexToName(i)
@@ -62,7 +62,7 @@ func (c *GaneshaController) createGanesha(n cephv1.CephNFS) error {
 		}
 
 		// create a service
-		err = c.createGaneshaService(n, name)
+		err = c.createCephNFSService(n, name)
 		if err != nil {
 			return fmt.Errorf("failed to create ganesha service. %+v", err)
 		}
@@ -76,8 +76,8 @@ func (c *GaneshaController) createGanesha(n cephv1.CephNFS) error {
 }
 
 // Create empty config file for new ganesha server
-func (c *GaneshaController) addRADOSConfigFile(n cephv1.CephNFS, name string) error {
-	nodeID := getGaneshaNodeID(n, name)
+func (c *CephNFSController) addRADOSConfigFile(n cephv1.CephNFS, name string) error {
+	nodeID := getNFSNodeID(n, name)
 	config := getGaneshaConfigObject(nodeID)
 	err := c.context.Executor.ExecuteCommand(false, "", "rados", "--pool", n.Spec.RADOS.Pool, "--namespace", n.Spec.RADOS.Namespace, "stat", config)
 	if err == nil {
@@ -88,19 +88,19 @@ func (c *GaneshaController) addRADOSConfigFile(n cephv1.CephNFS, name string) er
 	return c.context.Executor.ExecuteCommand(false, "", "rados", "--pool", n.Spec.RADOS.Pool, "--namespace", n.Spec.RADOS.Namespace, "create", config)
 }
 
-func (c *GaneshaController) addServerToDatabase(n cephv1.CephNFS, name string) error {
-	nodeID := getGaneshaNodeID(n, name)
+func (c *CephNFSController) addServerToDatabase(n cephv1.CephNFS, name string) error {
+	nodeID := getNFSNodeID(n, name)
 	logger.Infof("Adding ganesha %s to grace db", nodeID)
 	return c.context.Executor.ExecuteCommand(false, "", "ganesha-rados-grace", "--pool", n.Spec.RADOS.Pool, "--ns", n.Spec.RADOS.Namespace, "add", nodeID)
 }
 
-func (c *GaneshaController) removeServerFromDatabase(n cephv1.CephNFS, name string) error {
-	nodeID := getGaneshaNodeID(n, name)
+func (c *CephNFSController) removeServerFromDatabase(n cephv1.CephNFS, name string) error {
+	nodeID := getNFSNodeID(n, name)
 	logger.Infof("Removing ganesha %s from grace db", nodeID)
 	return c.context.Executor.ExecuteCommand(false, "", "ganesha-rados-grace", "--pool", n.Spec.RADOS.Pool, "--ns", n.Spec.RADOS.Namespace, "remove", nodeID)
 }
 
-func (c *GaneshaController) generateConfig(n cephv1.CephNFS, name string) (string, error) {
+func (c *CephNFSController) generateConfig(n cephv1.CephNFS, name string) (string, error) {
 
 	data := map[string]string{
 		"config": getGaneshaConfig(n, name),
@@ -126,7 +126,7 @@ func (c *GaneshaController) generateConfig(n cephv1.CephNFS, name string) (strin
 }
 
 // Delete the ganesha server
-func (c *GaneshaController) deleteGanesha(n cephv1.CephNFS) error {
+func (c *CephNFSController) deleteGanesha(n cephv1.CephNFS) error {
 	for i := 0; i < n.Spec.Server.Active; i++ {
 		name := k8sutil.IndexToName(i)
 

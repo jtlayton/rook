@@ -35,10 +35,10 @@ import (
 const (
 	appName             = "rook-ceph-ganesha"
 	ganeshaConfigVolume = "ganesha-config"
-	ganeshaPort         = 2049
+	nfsPort             = 2049
 )
 
-func (c *GaneshaController) createGaneshaService(n cephv1.CephNFS, name string) error {
+func (c *CephNFSController) createCephNFSService(n cephv1.CephNFS, name string) error {
 	labels := getLabels(n, name)
 	svc := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -51,8 +51,8 @@ func (c *GaneshaController) createGaneshaService(n cephv1.CephNFS, name string) 
 			Ports: []v1.ServicePort{
 				{
 					Name:       "nfs",
-					Port:       ganeshaPort,
-					TargetPort: intstr.FromInt(int(ganeshaPort)),
+					Port:       nfsPort,
+					TargetPort: intstr.FromInt(int(nfsPort)),
 					Protocol:   v1.ProtocolTCP,
 				},
 			},
@@ -68,15 +68,15 @@ func (c *GaneshaController) createGaneshaService(n cephv1.CephNFS, name string) 
 		if !errors.IsAlreadyExists(err) {
 			return fmt.Errorf("failed to create ganesha service. %+v", err)
 		}
-		logger.Infof("ganesha service already created")
+		logger.Infof("ceph nfs service already created")
 		return nil
 	}
 
-	logger.Infof("ganesha service running at %s:%d", svc.Spec.ClusterIP, ganeshaPort)
+	logger.Infof("ceph nfs service running at %s:%d", svc.Spec.ClusterIP, nfsPort)
 	return nil
 }
 
-func (c *GaneshaController) makeDeployment(n cephv1.CephNFS, name, configName string) *extensions.Deployment {
+func (c *CephNFSController) makeDeployment(n cephv1.CephNFS, name, configName string) *extensions.Deployment {
 	binariesEnvVar, binariesVolume, binariesMount := k8sutil.BinariesMountInfo()
 
 	deployment := &extensions.Deployment{
@@ -117,18 +117,18 @@ func (c *GaneshaController) makeDeployment(n cephv1.CephNFS, name, configName st
 		Spec: podSpec,
 	}
 
-	// Multiple replicas of the ganesha service would be handled by creating a service and a new deployment for each one, rather than increasing the pod count here
+	// Multiple replicas of the nfs service would be handled by creating a service and a new deployment for each one, rather than increasing the pod count here
 	replicas := int32(1)
 	deployment.Spec = extensions.DeploymentSpec{Template: podTemplateSpec, Replicas: &replicas}
 	return deployment
 }
 
-func (c *GaneshaController) initContainer(n cephv1.CephNFS, binariesEnvVar v1.EnvVar, binariesMount v1.VolumeMount) v1.Container {
+func (c *CephNFSController) initContainer(n cephv1.CephNFS, binariesEnvVar v1.EnvVar, binariesMount v1.VolumeMount) v1.Container {
 
 	return v1.Container{
 		Args: []string{
 			"ceph",
-			"ganesha",
+			"nfs",
 			"init",
 		},
 		Name:  opspec.ConfigInitContainerName,
@@ -149,7 +149,7 @@ func (c *GaneshaController) initContainer(n cephv1.CephNFS, binariesEnvVar v1.En
 	}
 }
 
-func (c *GaneshaController) daemonContainer(n cephv1.CephNFS, name string, binariesMount v1.VolumeMount) v1.Container {
+func (c *CephNFSController) daemonContainer(n cephv1.CephNFS, name string, binariesMount v1.VolumeMount) v1.Container {
 	configMount := v1.VolumeMount{Name: ganeshaConfigVolume, MountPath: "/etc/ganesha"}
 
 	return v1.Container{
@@ -159,10 +159,10 @@ func (c *GaneshaController) daemonContainer(n cephv1.CephNFS, name string, binar
 		Args: []string{
 			"--", path.Join(k8sutil.BinariesMountPath, "rook"),
 			"ceph",
-			"ganesha",
+			"nfs",
 			"run",
 		},
-		Name:  "nfs-ganesha",
+		Name:  "ceph-nfs",
 		Image: c.cephVersion.Image,
 		VolumeMounts: append(
 			opspec.CephVolumeMounts(),
@@ -171,7 +171,7 @@ func (c *GaneshaController) daemonContainer(n cephv1.CephNFS, name string, binar
 		),
 		Env: append(
 			k8sutil.ClusterDaemonEnvVars(),
-			v1.EnvVar{Name: "ROOK_GANESHA_NAME", Value: name}),
+			v1.EnvVar{Name: "ROOK_CEPH_NFS_NAME", Value: name}),
 		Resources: n.Spec.Server.Resources,
 	}
 }
@@ -180,7 +180,7 @@ func getLabels(n cephv1.CephNFS, name string) map[string]string {
 	return map[string]string{
 		k8sutil.AppAttr:     appName,
 		k8sutil.ClusterAttr: n.Namespace,
-		"nfs_ganesha":       n.Name,
+		"ceph_nfs":          n.Name,
 		"instance":          name,
 	}
 }

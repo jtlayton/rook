@@ -28,7 +28,7 @@ const (
 	userID         = "admin"
 )
 
-func getGaneshaNodeID(n cephv1.CephNFS, name string) string {
+func getNFSNodeID(n cephv1.CephNFS, name string) string {
 	return fmt.Sprintf("%s.%s", n.Name, name)
 }
 
@@ -48,7 +48,7 @@ func getRadosURL(n cephv1.CephNFS, nodeID string) string {
 }
 
 func getGaneshaConfig(n cephv1.CephNFS, name string) string {
-	nodeID := getGaneshaNodeID(n, name)
+	nodeID := getNFSNodeID(n, name)
 	url := getRadosURL(n, nodeID)
 	return `
 NFS_CORE_PARAM {

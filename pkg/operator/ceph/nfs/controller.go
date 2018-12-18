@@ -31,18 +31,18 @@ import (
 
 var logger = capnslog.NewPackageLogger("github.com/rook/rook", "op-nfs")
 
-// FilesystemResource represents the file system custom resource
-var NFSGaneshaResource = opkit.CustomResource{
-	Name:    "cephnfsganesha",
-	Plural:  "cephnfsganeshas",
+// CephNFSResource represents the file system custom resource
+var CephNFSResource = opkit.CustomResource{
+	Name:    "cephnfs",
+	Plural:  "cephnfses",
 	Group:   cephv1.CustomResourceGroup,
 	Version: cephv1.Version,
 	Scope:   apiextensionsv1beta1.NamespaceScoped,
 	Kind:    reflect.TypeOf(cephv1.CephNFS{}).Name(),
 }
 
-// NFSGaneshaController represents a controller for NFS custom resources
-type GaneshaController struct {
+// NFSCephNFSController represents a controller for NFS custom resources
+type CephNFSController struct {
 	context     *clusterd.Context
 	rookImage   string
 	cephVersion cephv1.CephVersionSpec
@@ -50,9 +50,9 @@ type GaneshaController struct {
 	ownerRef    metav1.OwnerReference
 }
 
-// NewNFSGaneshaController create controller for watching NFS custom resources created
-func NewGaneshaController(context *clusterd.Context, rookImage string, cephVersion cephv1.CephVersionSpec, hostNetwork bool, ownerRef metav1.OwnerReference) *GaneshaController {
-	return &GaneshaController{
+// NewNFSCephNFSController create controller for watching NFS custom resources created
+func NewCephNFSController(context *clusterd.Context, rookImage string, cephVersion cephv1.CephVersionSpec, hostNetwork bool, ownerRef metav1.OwnerReference) *CephNFSController {
+	return &CephNFSController{
 		context:     context,
 		rookImage:   rookImage,
 		cephVersion: cephVersion,
@@ -61,8 +61,8 @@ func NewGaneshaController(context *clusterd.Context, rookImage string, cephVersi
 	}
 }
 
-// StartWatch watches for instances of Filesystem custom resources and acts on them
-func (c *GaneshaController) StartWatch(namespace string, stopCh chan struct{}) error {
+// StartWatch watches for instances of CephNFS custom resources and acts on them
+func (c *CephNFSController) StartWatch(namespace string, stopCh chan struct{}) error {
 
 	resourceHandlerFuncs := cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.onAdd,
@@ -70,27 +70,27 @@ func (c *GaneshaController) StartWatch(namespace string, stopCh chan struct{}) e
 		DeleteFunc: c.onDelete,
 	}
 
-	logger.Infof("start watching filesystem resource in namespace %s", namespace)
-	watcher := opkit.NewWatcher(NFSGaneshaResource, namespace, resourceHandlerFuncs, c.context.RookClientset.CephV1().RESTClient())
+	logger.Infof("start watching ceph nfs resource in namespace %s", namespace)
+	watcher := opkit.NewWatcher(CephNFSResource, namespace, resourceHandlerFuncs, c.context.RookClientset.CephV1().RESTClient())
 	go watcher.Watch(&cephv1.CephNFS{}, stopCh)
 
 	return nil
 }
 
-func (c *GaneshaController) onAdd(obj interface{}) {
-	nfsGanesha := obj.(*cephv1.CephNFS).DeepCopy()
+func (c *CephNFSController) onAdd(obj interface{}) {
+	nfs := obj.(*cephv1.CephNFS).DeepCopy()
 
-	err := c.createGanesha(*nfsGanesha)
+	err := c.createCephNFS(*nfs)
 	if err != nil {
-		logger.Errorf("failed to create NFS Ganesha %s. %+v", nfsGanesha.Name, err)
+		logger.Errorf("failed to create NFS Ganesha %s. %+v", nfs.Name, err)
 	}
 }
 
-func (c *GaneshaController) onUpdate(oldObj, newObj interface{}) {
+func (c *CephNFSController) onUpdate(oldObj, newObj interface{}) {
 	oldNFS := oldObj.(*cephv1.CephNFS).DeepCopy()
 	newNFS := newObj.(*cephv1.CephNFS).DeepCopy()
 
-	if !nfsGaneshaChanged(oldNFS.Spec, newNFS.Spec) {
+	if !nfsChanged(oldNFS.Spec, newNFS.Spec) {
 		logger.Debugf("nfs ganesha %s not updated", newNFS.Name)
 		return
 	}
@@ -98,7 +98,7 @@ func (c *GaneshaController) onUpdate(oldObj, newObj interface{}) {
 	logger.Infof("TODO: Update the ganesha server from %d to %d active count", oldNFS.Spec.Server.Active, newNFS.Spec.Server.Active)
 }
 
-func (c *GaneshaController) onDelete(obj interface{}) {
+func (c *CephNFSController) onDelete(obj interface{}) {
 	nfsGanesha := obj.(*cephv1.CephNFS).DeepCopy()
 
 	err := c.deleteGanesha(*nfsGanesha)
@@ -107,7 +107,7 @@ func (c *GaneshaController) onDelete(obj interface{}) {
 	}
 }
 
-func nfsGaneshaChanged(oldNFS, newNFS cephv1.NFSGaneshaSpec) bool {
+func nfsChanged(oldNFS, newNFS cephv1.NFSGaneshaSpec) bool {
 	if oldNFS.Server.Active != newNFS.Server.Active {
 		return true
 	}

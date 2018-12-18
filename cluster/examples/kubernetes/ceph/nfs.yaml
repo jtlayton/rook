@@ -10,12 +10,12 @@ spec:
     # If using the object store example, the data pool would be "my-store.rgw.buckets.data".
     pool: myfs-data0
     # RADOS namespace where NFS client recovery data is stored in the pool.
-    namespace: ganesha-ns
-  # Settings for the ganesha server
+    namespace: nfs-ns
+  # Settings for the NFS server
   server:
-    # the number of active ganesha servers
+    # the number of active NFS servers
     active: 3
-    # where to run the nfs ganesha server
+    # where to run the NFS server
     placement:
     #  nodeAffinity:
     #    requiredDuringSchedulingIgnoredDuringExecution:

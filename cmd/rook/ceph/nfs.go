@@ -28,31 +28,31 @@ var (
 	ganeshaCopyBinariesPath string
 )
 
-var ganeshaCmd = &cobra.Command{
-	Use:    "ganesha",
-	Short:  "Configures and runs the nfs ganesha daemon",
+var nfsCmd = &cobra.Command{
+	Use:    "nfs",
+	Short:  "Configures and runs the ceph nfs daemon",
 	Hidden: true,
 }
 var ganeshaConfigCmd = &cobra.Command{
 	Use:    "init",
-	Short:  "Updates ceph.conf for ganesha",
+	Short:  "Updates ceph.conf for nfs",
 	Hidden: true,
 }
 var ganeshaRunCmd = &cobra.Command{
 	Use:    "run",
-	Short:  "Runs the nfs ganesha daemon",
+	Short:  "Runs the ceph nfs daemon",
 	Hidden: true,
 }
 
 func init() {
-	ganeshaRunCmd.Flags().StringVar(&ganeshaName, "ganesha-name", "", "name of the ganesha server")
+	ganeshaRunCmd.Flags().StringVar(&ganeshaName, "ceph-nfs-name", "", "name of the nfs server")
 	ganeshaConfigCmd.Flags().StringVar(&ganeshaCopyBinariesPath, "copy-binaries-path", "", "If specified, copy the rook binaries to this path for use by the daemon container")
 	addCephFlags(ganeshaConfigCmd)
 
-	ganeshaCmd.AddCommand(ganeshaConfigCmd)
-	ganeshaCmd.AddCommand(ganeshaRunCmd)
+	nfsCmd.AddCommand(ganeshaConfigCmd)
+	nfsCmd.AddCommand(ganeshaRunCmd)
 
-	flags.SetFlagsFromEnv(ganeshaCmd.Flags(), rook.RookEnvVarPrefix)
+	flags.SetFlagsFromEnv(nfsCmd.Flags(), rook.RookEnvVarPrefix)
 	flags.SetFlagsFromEnv(ganeshaConfigCmd.Flags(), rook.RookEnvVarPrefix)
 	flags.SetFlagsFromEnv(ganeshaRunCmd.Flags(), rook.RookEnvVarPrefix)
 
@@ -84,13 +84,13 @@ func configGanesha(cmd *cobra.Command, args []string) error {
 }
 
 func startGanesha(cmd *cobra.Command, args []string) error {
-	required := []string{"ganesha-name"}
+	required := []string{"ceph-nfs-name"}
 	if err := flags.VerifyRequiredFlags(ganeshaRunCmd, required); err != nil {
 		return err
 	}
 
 	rook.SetLogLevel()
-	rook.LogStartupInfo(ganeshaCmd.Flags())
+	rook.LogStartupInfo(nfsCmd.Flags())
 
 	err := ganesha.Run(createContext(), ganeshaName)
 	if err != nil {

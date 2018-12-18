@@ -242,7 +242,7 @@ func (c *ClusterController) onAdd(obj interface{}) {
 	fileController.StartWatch(cluster.Namespace, cluster.stopCh)
 
 	// Start nfs ganesha CRD watcher
-	ganeshaController := nfs.NewGaneshaController(c.context, c.rookImage, cluster.Spec.CephVersion, cluster.Spec.Network.HostNetwork, cluster.ownerRef)
+	ganeshaController := nfs.NewCephNFSController(c.context, c.rookImage, cluster.Spec.CephVersion, cluster.Spec.Network.HostNetwork, cluster.ownerRef)
 	ganeshaController.StartWatch(cluster.Namespace, cluster.stopCh)
 
 	// Start mon health checker
