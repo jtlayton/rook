@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	appName             = "rook-ceph-ganesha"
+	appName             = "rook-ceph-nfs"
 	ganeshaConfigVolume = "ganesha-config"
 	nfsPort             = 2049
 )
