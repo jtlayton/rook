@@ -161,8 +161,8 @@ metadata:
   namespace: rook-ceph
 spec:
   cephVersion:
-    image: ceph/ceph:v13
-    allowUnsupported: false
+    image: ceph/daemon-base:latest-master
+    allowUnsupported: true
   dataDirHostPath: /data/rook
   mon:
     count: 1
