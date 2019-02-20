@@ -163,7 +163,7 @@ spec:
   cephVersion:
     image: ceph/ceph:v13
     allowUnsupported: false
-  dataDirHostPath: /var/lib/rook
+  dataDirHostPath: /data/rook
   mon:
     count: 1
     allowMultiplePerNode: true
